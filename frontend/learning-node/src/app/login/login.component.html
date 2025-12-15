@@ -1,0 +1,27 @@
+<div class="form-page justify-center flex">
+  <div class="login-form form-container flex justify-center">
+    <form name="loginForm" [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex justify-center flex-col">
+      <div class="flex-col flex justify-center">
+        <mat-form-field class="input-fields">
+          <input matInput color="tertiary" type="text" formControlName="username" placeholder="Username">
+          <mat-icon matSuffix class="secondary-text">mail</mat-icon>
+          <mat-error *ngIf="!loginForm.get('username')?.valid" class="error">
+            Username is required!
+          </mat-error>
+
+        </mat-form-field>
+        <mat-form-field class="input-fields">
+          <input matInput type="password" formControlName="password" placeholder="Password">
+          <mat-icon matSuffix class="secondary-text">vpn_key</mat-icon>
+          <mat-error *ngIf="!loginForm.get('password')?.valid" class="error">
+            Password is required!
+          </mat-error>
+        </mat-form-field>
+        <a href="/register" class="small-font">New here? Create an account</a>
+      </div>
+
+      <button mat-raised-button type="submit" color="primary" class="button">Login</button>
+
+    </form>
+  </div>
+</div>

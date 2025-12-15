@@ -40,3 +40,7 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+frontend/learning-node/.angular/
+frontend/learning-node/.vscode/
+frontend/learning-node/node_modules/.package-lock.json
+frontend/learning-node/node_modules/
