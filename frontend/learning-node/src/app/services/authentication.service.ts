@@ -10,7 +10,7 @@ export class AuthenticationService {
   constructor(private _http: HttpClient)
   {}
 
-  login(loginFormData: FormData): Observable<any>
+  login(loginFormData: any): Observable<any>
   {
     return this._http.post('http://localhost:8000/api/auth/login', loginFormData);
   }
@@ -20,7 +20,14 @@ export class AuthenticationService {
     return this._http.post('http://localhost:8000/api/auth/register', registerData);
   }
 
-  // isUserExist(userobj: Object): any
-  // {
-  // }
+  saveToken(token: string): void
+  {
+    localStorage.setItem('access_token', token);
+
+  }
+
+  getUser(): Observable<any>
+  {
+    return this._http.get('http://localhost:8000/api/auth/getUser')
+  }
 }

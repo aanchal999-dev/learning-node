@@ -1,3 +1,14 @@
 [
- 
+ {
+  "name": "aanchal",
+  "designation": "SDE",
+  "username": "au@gm.com",
+  "password": "qwertyui"
+ },
+ {
+  "name": "aanchal",
+  "designation": "SDE",
+  "username": "adity@gm.com",
+  "password": "qwertyui"
+ }
 ]

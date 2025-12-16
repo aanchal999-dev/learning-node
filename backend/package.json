@@ -18,5 +18,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.2"
   }
 }

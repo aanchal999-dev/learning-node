@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
   selector: 'app-register',
   standalone: true,
   providers:[AuthenticationService],
-  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, CommonModule, CdkOverlayOrigin],
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, CommonModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })

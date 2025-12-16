@@ -44,3 +44,4 @@ frontend/learning-node/.angular/
 frontend/learning-node/.vscode/
 frontend/learning-node/node_modules/.package-lock.json
 frontend/learning-node/node_modules/
+backend/node_modules/

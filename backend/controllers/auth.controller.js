@@ -1,20 +1,88 @@
-import { log } from "console";
 import fs from "fs";
+import jwt from "jsonwebtoken"
+
+const admin ={username: 'admin@mail.com', password: 'adminpassword'}
+
+export const getUser = async(req, res) => {
+    console.log(req.body);
+    const isAdmin = req.body.username.include('admin');
+    const role = isAdmin ? 'admin' : 'user'
+    let status = 200
+    let data;
+    let userArray;
+    try{
+        const userData = await fs.promises.readFile('./storage/data.json', 'utf8');
+        userArray = await JSON.parse(userData);
+        const foundUser = findUser(userArray, req.body.username);
+        if(!isAdmin && !foundUser)
+        {
+            status = 404
+            data = 'User not found!';
+        }
+        else if(isAdmin)
+        {
+            data = userArray;
+        }
+        else if(foundUser)
+        {
+            data = foundUser;
+        }
+    }catch(error)
+    {
+        status = 500;
+        data = 'Error reading file';
+        console.error('Error reading file', error);
+    }
+    return res.status(status).json(data);
+}
 
 export const login =  async(req, res) => {
-    let userdata;
-    fs.readFile('./storage/data.json', 'utf8', async(error, data) => {
-        if (error) {
-          console.error('Error reading file', error);
-          return;
+    const loginDetails = req.body;
+    let status = 200;
+    let data;
+    if (!loginDetails.username?.length){
+        status = 422;
+        data = 'Username is required';
+    }
+    else if (!loginDetails.password?.length>=6){
+        status = 422;
+        data = 'Password is required';
+    }
+    else
+    {
+        let userArray;
+        try{
+            const userData = await fs.promises.readFile('./storage/data.json', 'utf8');
+            userArray = await JSON.parse(userData);
+            const foundUser = findUser(userArray, loginDetails.username);
+            if(foundUser)
+            {
+               if(foundUser.password === loginDetails.password)
+               {
+                const token = jwt.sign({ username: foundUser.username, role: 'user'}, 'xyz-secret-key', {
+                    expiresIn: '1h',
+                    });
+                    data = {message:'login successful', token};
+               }    
+               else
+               {
+                    status = 500;
+                    data = 'password incorrect!'
+               }            
+            }
+            else
+            {
+                status = 404;
+                data = 'User not found!'
+            }
+
+        } catch(error) {
+            status = 500;
+            data = 'Error reading file';
+            console.error('Error reading file', error);
         }
-        try {
-          userdata = await JSON.parse(data);
-        } catch (parseError) {
-          console.error('Error parsing JSON:', parseError);
-        }
-    });
-    res.status(200).json(userdata);
+    }
+    return res.status(status).json(data);
   };
 
 export const register = async (req, res) => {
@@ -73,3 +141,9 @@ export const register = async (req, res) => {
     }
     return res.status(status).json(data);
   }
+
+export function findUser(userArray, username) {
+    const foundUser = userArray.find((user) =>
+        user.username === username);
+    return foundUser;
+}

@@ -19,8 +19,8 @@ import { take } from 'rxjs';
 })
 export class LoginComponent  implements OnInit{
   loginForm = new FormGroup({
-    username: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)])
+    username: new FormControl('au@gm.com', [Validators.required, Validators.email]),
+    password: new FormControl('qwertyui', [Validators.required, Validators.minLength(6)])
   });
   serverError: string;
 
@@ -34,24 +34,26 @@ export class LoginComponent  implements OnInit{
 
   onSubmit(): void
   {
-    if(!this.loginForm.invalid)
+    if(this.loginForm.valid)
       {
         this.serverError = '';
         const loginFormData: FormData = new FormData();
         // loginFormData.append('username', this.loginForm.controls.username.value || '');
         // loginFormData.append('password', this.loginForm.controls.password.value || '');
-        const abj = {
+        const obj = {
           'username': this.loginForm.controls.username.value || '' ,
           'password': this.loginForm.controls.password.value || ''
         }
 
-        this._authenticationService.login(loginFormData)
+        this._authenticationService.login(obj)
         .pipe(
           take(1)
         )
-        .subscribe((data: any) => {
-
-        }
+        .subscribe((data: any) =>
+          {
+            this._authenticationService.saveToken(data.token);
+            this._authenticationService.getUser().subscribe();
+          }
 
         )
       }
