@@ -6,7 +6,7 @@ export const authMiddleware = (req, res, next) => {
     {
         try {
             token = req.headers.authorization.split(' ')[1];
-            const decodedToken = jwt.verify(token, 'xyz-secret-key');
+            const decodedToken = jwt.verify(token, process.env.API_KEY);
             req.user = decodedToken;
             next();
         } catch (error) {

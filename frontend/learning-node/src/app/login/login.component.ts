@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { AuthenticationService } from '../services/authentication.service';
 import { take } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +25,9 @@ export class LoginComponent  implements OnInit{
   });
   serverError: string;
 
-  constructor( private _authenticationService: AuthenticationService)
+  constructor( private _authenticationService: AuthenticationService,
+               private _router: Router
+  )
   {
     this.serverError = '';
   }
@@ -51,8 +54,9 @@ export class LoginComponent  implements OnInit{
         )
         .subscribe((data: any) =>
           {
-            this._authenticationService.saveToken(data.token);
-            this._authenticationService.getUser().subscribe();
+            const {message, ...dataToSave} = data;
+            this._authenticationService.saveToken(dataToSave);
+            this._router.navigate(['dashboard']);
           }
 
         )

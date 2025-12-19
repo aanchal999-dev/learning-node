@@ -1,0 +1,25 @@
+.table-container{
+  padding: 16px;
+}
+
+.color-grey{
+  background-color: rgb(219, 208, 208) !important;
+  color: black !important;
+}
+
+.header{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: #0a0a58;
+  color: whitesmoke;
+}
+
+.logout-button{
+  background-color: #d2dede !important;
+  color: #0a0a58 !important;
+}

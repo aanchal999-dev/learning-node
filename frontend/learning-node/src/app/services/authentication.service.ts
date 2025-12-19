@@ -20,9 +20,10 @@ export class AuthenticationService {
     return this._http.post('http://localhost:8000/api/auth/register', registerData);
   }
 
-  saveToken(token: string): void
+  saveToken(data: any): void
   {
-    localStorage.setItem('access_token', token);
+    localStorage.setItem('access_token', data.token);
+    localStorage.setItem('role', data.role);
 
   }
 

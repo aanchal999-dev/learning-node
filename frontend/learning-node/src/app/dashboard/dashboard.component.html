@@ -1,0 +1,36 @@
+<div class="header">
+  Welcome!
+  <button mat-raised-button (click)="logout()" color="primary" class="logout-button">Logout</button>
+</div>
+<div class="table-container">
+  <table mat-table [dataSource]="userDataSource" class="mat-elevation-z8">
+    <!-- name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td class="color-grey" mat-cell *matCellDef="let element"> {{element.name}} </td>
+    </ng-container>
+
+    <!-- designation Column -->
+    <ng-container matColumnDef="designation">
+      <th mat-header-cell *matHeaderCellDef> Designation </th>
+      <td class="color-grey" mat-cell *matCellDef="let element"> {{element.designation}} </td>
+    </ng-container>
+
+    <!-- username Column -->
+    <ng-container matColumnDef="username">
+      <th mat-header-cell *matHeaderCellDef> Username </th>
+      <td class="color-grey" mat-cell *matCellDef="let element"> {{element.username}} </td>
+    </ng-container>
+
+    <!-- password Column -->
+    <ng-container matColumnDef="password">
+      <th mat-header-cell *matHeaderCellDef> Password </th>
+      <td class="color-grey" mat-cell *matCellDef="let element"> {{element.password}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: userColumns;"></tr>
+  </table>
+</div>
+
+

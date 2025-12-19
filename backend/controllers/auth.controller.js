@@ -1,11 +1,8 @@
 import fs from "fs";
 import jwt from "jsonwebtoken"
 
-const admin ={username: 'admin@mail.com', password: 'adminpassword'}
-
 export const getUser = async(req, res) => {
-    console.log(req.body);
-    const isAdmin = req.body.username.include('admin');
+    const isAdmin = req.user.username.includes('admin');
     const role = isAdmin ? 'admin' : 'user'
     let status = 200
     let data;
@@ -13,7 +10,7 @@ export const getUser = async(req, res) => {
     try{
         const userData = await fs.promises.readFile('./storage/data.json', 'utf8');
         userArray = await JSON.parse(userData);
-        const foundUser = findUser(userArray, req.body.username);
+        const foundUser = findUser(userArray, req.user.username);
         if(!isAdmin && !foundUser)
         {
             status = 404
@@ -25,7 +22,7 @@ export const getUser = async(req, res) => {
         }
         else if(foundUser)
         {
-            data = foundUser;
+            data = [foundUser];
         }
     }catch(error)
     {
@@ -52,28 +49,38 @@ export const login =  async(req, res) => {
     {
         let userArray;
         try{
+            const isAdmin = loginDetails.username.includes('admin');
+            const role = isAdmin ? 'admin' : 'user';
             const userData = await fs.promises.readFile('./storage/data.json', 'utf8');
             userArray = await JSON.parse(userData);
-            const foundUser = findUser(userArray, loginDetails.username);
-            if(foundUser)
+            if(isAdmin && (loginDetails.username !== process.env.ADMIN_USERNAME || 
+                                loginDetails.password !== process.env.ADMIN_PASSWORD))
             {
-               if(foundUser.password === loginDetails.password)
-               {
-                const token = jwt.sign({ username: foundUser.username, role: 'user'}, 'xyz-secret-key', {
-                    expiresIn: '1h',
-                    });
-                    data = {message:'login successful', token};
-               }    
-               else
-               {
+                console.log(admin);
+                status = 401;
+                data = 'Unauthorised access';
+            }
+            else if(!isAdmin)
+            {
+                const foundUser = findUser(userArray, loginDetails.username);
+                if(foundUser)
+                {
+                   if(foundUser.password !== loginDetails.password)
+                   {
                     status = 500;
                     data = 'password incorrect!'
-               }            
+                   }            
+                }
+                else
+                {
+                    status = 404;
+                    data = 'User not found!'
+                }
             }
-            else
+            if(status === 200)
             {
-                status = 404;
-                data = 'User not found!'
+                const token = jwt.sign({ username: loginDetails.username, role}, process.env.API_KEY, {expiresIn: '1h'});
+                data = {message:'login successful', token, role};
             }
 
         } catch(error) {
