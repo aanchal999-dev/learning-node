@@ -1,135 +1,120 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+import { userData } from 'src/common/types';
 import { LoginDto, RegisterDto } from 'src/dto/auth.dto';
-import fs from 'fs';
-import { resData, userData } from 'src/common/types';
+
+export interface StoredUser extends RegisterDto {
+  role?: string;
+}
 
 @Injectable()
 export class AuthService {
-  constructor(private _jwtService: JwtService) {}
+  private readonly logger = new Logger(AuthService.name);
+  private readonly filePath = path.join(process.cwd(), 'storage', 'data.json');
 
-  async saveUser(payload: RegisterDto): Promise<resData> {
-    let status = 201;
-    let message = '';
-    let isSuccess = false;
-    const fileData = await fs.promises.readFile('./storage/data.json', 'utf8');
-    const userdata = (await JSON.parse(fileData)) as RegisterDto[];
-    const userExists = userdata.some((obj) => {
-      return obj.username === payload.username;
+  constructor(private readonly _jwtService: JwtService) {}
+
+  private async readUsers(): Promise<StoredUser[]> {
+    try {
+      const fileData = await fs.readFile(this.filePath, 'utf8');
+      return JSON.parse(fileData) as StoredUser[];
+    } catch (error) {
+      this.logger.error('Error reading data file', error);
+      throw new InternalServerErrorException('Error reading storage data');
+    }
+  }
+
+  private async writeUsers(users: StoredUser[]): Promise<void> {
+    try {
+      await fs.writeFile(this.filePath, JSON.stringify(users, null, 2), 'utf8');
+    } catch (error) {
+      this.logger.error('Error writing data file', error);
+      throw new InternalServerErrorException('Error saving user data');
+    }
+  }
+
+  async saveUser(payload: RegisterDto): Promise<{ message: string }> {
+    const users = await this.readUsers();
+    const userExists = users.some((user) => user.username === payload.username);
+
+    if (userExists) {
+      throw new ConflictException('Username already exists!');
+    }
+
+    const hashedPassword = await bcrypt.hash(payload.password, 10);
+    const role = payload.username === 'admin@login.com' ? 'admin' : 'user';
+
+    const newUser: StoredUser = {
+      ...payload,
+      password: hashedPassword,
+      role,
+    };
+
+    users.push(newUser);
+    await this.writeUsers(users);
+
+    return { message: 'User registered successfully' };
+  }
+
+  async authenticateUser(
+    payload: LoginDto,
+  ): Promise<{ token: string; role: string; message: string }> {
+    const users = await this.readUsers();
+    const foundUser = users.find((u) => u.username === payload.username);
+
+    if (!foundUser) {
+      throw new NotFoundException('User not found!');
+    }
+
+    // Support bcrypt hashed passwords with fallback to plain text for legacy testing data
+    let isPasswordValid = await bcrypt.compare(payload.password, foundUser.password);
+    if (!isPasswordValid && payload.password === foundUser.password) {
+      isPasswordValid = true;
+    }
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials!');
+    }
+
+    const role = foundUser.role || (foundUser.username === 'admin@login.com' ? 'admin' : 'user');
+
+    const token = await this._jwtService.signAsync({
+      username: foundUser.username,
+      role,
     });
-    if (!userExists) {
-      userdata.push(payload);
-      try {
-        await fs.promises.writeFile(
-          './storage/data.json',
-          JSON.stringify(userdata, null, 1),
-          'utf8',
-        );
-        message = 'User data saved';
-        isSuccess = true;
-        console.log('User data saved');
-      } catch (error) {
-        status = 500;
-        message = 'Error parsing JSON';
-        console.error('Error parsing JSON:', error);
-      }
-    } else {
-      status = 422;
-      message = 'Username already exists!';
-    }
-    return { message, isSuccess, status };
+
+    return {
+      message: 'Login successful',
+      token,
+      role,
+    };
   }
 
-  private findUser(
-    userArray: RegisterDto[],
-    username: string,
-  ): RegisterDto | undefined {
-    const foundUser = userArray.find(
-      (user: RegisterDto) => user.username === username,
-    );
-    return foundUser;
-  }
+  async getAllUsers(userDetails: userData): Promise<StoredUser[]> {
+    const users = await this.readUsers();
+    const currentUser = users.find((u) => u.username === userDetails.username);
 
-  async authenticateUser(payload: LoginDto): Promise<resData> {
-    let status = 200;
-    let message: string = '';
-    let isSuccess = false;
-    let userArray: RegisterDto[];
-    let data: { token: string; role: string } | null = null;
-    try {
-      const isAdmin = payload.username.includes('admin');
-      const role = isAdmin ? 'admin' : 'user';
-      const userData = await fs.promises.readFile(
-        './storage/data.json',
-        'utf8',
-      );
-      userArray = (await JSON.parse(userData)) as RegisterDto[];
-      if (
-        isAdmin &&
-        (payload.username !== 'admin@login.com' ||
-          payload.password !== 'adminpass')
-      ) {
-        status = 401;
-        message = 'Unauthorised access';
-      } else if (!isAdmin) {
-        const foundUser = this.findUser(userArray, payload.username);
-        if (foundUser) {
-          if (foundUser.password !== payload.password) {
-            status = 500;
-            message = 'password incorrect!';
-          }
-        } else {
-          status = 404;
-          message = 'User not found!';
-        }
-      }
-      if (status === 200) {
-        const token = await this._jwtService.signAsync({
-          username: payload.username,
-          role,
-        });
-        message = 'login successful';
-        isSuccess = true;
-        data = { token, role };
-      }
-    } catch (error) {
-      status = 500;
-      message = 'Error reading file';
-      console.error('Error reading file', error);
-    }
-    return { isSuccess, data, message, status };
-  }
+    const isAdmin =
+      currentUser?.role === 'admin' || userDetails.username === 'admin@login.com';
 
-  async getAllUsers(userDetails: userData): Promise<resData> {
-    const isAdmin = userDetails.username.includes('admin');
-    let status = 200;
-    let message = '';
-    let isSuccess = false;
-    let data: RegisterDto[] = [];
-    try {
-      const userData = await fs.promises.readFile(
-        './storage/data.json',
-        'utf8',
-      );
-      const userArray = (await JSON.parse(userData)) as RegisterDto[];
-      const foundUser = this.findUser(userArray, userDetails.username);
-      if (!isAdmin && !foundUser) {
-        status = 404;
-        message = 'User not found!';
-      } else if (isAdmin) {
-        data = userArray;
-        message = 'Users fetched for admin';
-        isSuccess = true;
-      } else if (foundUser) {
-        data = [foundUser];
-        message = 'Users fetched for user';
-        isSuccess = true;
-      }
-    } catch (error) {
-      status = 500;
-      message = 'Error reading file';
-      console.error('Error reading file', error);
+    if (isAdmin) {
+      return users;
     }
-    return { status, data, message, isSuccess };
+
+    if (currentUser) {
+      return [currentUser];
+    }
+
+    throw new NotFoundException('User not found!');
   }
 }

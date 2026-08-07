@@ -3,9 +3,3 @@ export type userData = {
   username: string;
 };
 
-export type resData = {
-  status: number;
-  message: string;
-  isSuccess: boolean;
-  data?: any;
-};
