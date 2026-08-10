@@ -1,20 +1,16 @@
 [
- {
-  "name": "cvbny",
-  "designation": "sde",
-  "username": "qwerkmbe@fe.comwnj",
-  "password": "zxcvwefewf"
- },
- {
-  "name": "cvbny",
-  "designation": "sde",
-  "username": "admin@login.com",
-  "password": "adminpass"
- },
- {
-  "name": "aanchal",
-  "designation": "qwe",
-  "username": "aanchal@fe.com",
-  "password": "password"
- }
+  {
+    "name": "E2E Test User",
+    "designation": "QA Tester",
+    "username": "user_1786386663015@example.com",
+    "password": "$2b$10$c0D1iNsziqaR0e5dU7E/3OrHQSXpaxYnJImYDvU9SbYa3.OulOYwa",
+    "role": "user"
+  },
+  {
+    "name": "E2E Admin User",
+    "designation": "Lead Admin",
+    "username": "admin@login.com",
+    "password": "$2b$10$s30L5JQXV0upRwhPeWFs0eu0CMmcx/s./9vxXDxOT/iFtrDJ8QXHS",
+    "role": "admin"
+  }
 ]

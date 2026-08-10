@@ -4,14 +4,19 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe(
-    {
+  app.useGlobalPipes(
+    new ValidationPipe({
       whitelist: true, // Strips any properties not declared in the DTO
       forbidNonWhitelisted: true, // Throws an error if extra properties are sent
       transform: true, // Automatically converts payloads to DTO instances
-    }
-  )
+    }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+
+  const port = process.env.PORT;
+  if (!port) {
+    throw new Error('PORT environment variable is missing');
+  }
+
+  await app.listen(port);
 }
 bootstrap();
