@@ -11,12 +11,6 @@ async function bootstrap() {
       transform: true, // Automatically converts payloads to DTO instances
     }),
   );
-
-  const port = process.env.PORT;
-  if (!port) {
-    throw new Error('PORT environment variable is missing');
-  }
-
-  await app.listen(port);
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

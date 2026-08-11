@@ -4,7 +4,8 @@ import * as path from 'path';
 import { StoredUser } from 'src/common/types';
 
 const logger = new Logger('StorageUtil');
-const filePath = path.join(process.cwd(), 'storage', 'data.json');
+const rootDir = process.cwd().endsWith('src') ? path.resolve(process.cwd(), '..') : process.cwd();
+const filePath = path.join(rootDir, 'storage', 'data.json');
 
 export async function readUsers(): Promise<StoredUser[]> {
   try {
