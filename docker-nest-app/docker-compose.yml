@@ -1,0 +1,72 @@
+services:
+  # MySQL Database
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: learning_node_db
+      MYSQL_USER: Aanchal
+      MYSQL_PASSWORD: Aanchal@123
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - mysql_data:/var/lib/mysql
+  # NestJS Backend
+  nest-backend:
+    build:
+      context: ./nest-backend
+      dockerfile: dockerfile
+    container_name: nest-backend-container
+    env_file:
+      - ./nest-backend/.env
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql-db
+    networks:
+      - app-network
+
+  #Angular Frontend
+  frontend:
+    profiles: [ "build" ]
+    build:
+      context: ./frontend/learning-node
+      dockerfile: dockerfile
+    container_name: frontend-container
+    volumes:
+      - frontend_dist:/app/dist/learning-node/browser #Mount volume to /app/dist/learning-node/browser
+    networks:
+      - app-network
+  #nginx
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/dockerfile
+    container_name: nginx-container
+    volumes:
+      - frontend_dist:/usr/share/nginx/html #Reads files from shared volume
+    ports:
+      - "8080:8080"
+    depends_on:
+      - nest-backend
+    networks:
+      - app-network
+
+# Shared network
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  frontend_dist:

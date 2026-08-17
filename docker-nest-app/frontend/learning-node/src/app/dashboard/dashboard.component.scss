@@ -1,0 +1,45 @@
+.table-container {
+  padding: 16px;
+}
+
+.color-grey {
+  background-color: rgb(219, 208, 208) !important;
+  color: black !important;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  background-color: #0a0a58;
+  color: whitesmoke;
+}
+
+.logout-button {
+  background-color: #d2dede !important;
+  color: #0a0a58 !important;
+}
+
+.warn-button {
+  background-color: #a31212 !important;
+  color: #d2dede !important;
+}
+
+.update-button {
+  background-color: rgb(5, 30, 113) !important;
+  color: #d2dede !important;
+  font-size: 8px;
+  padding: 2px;
+}
+
+.p-12 {
+  padding: 12px;
+}
+
+.text-center {
+  text-align: center;
+}

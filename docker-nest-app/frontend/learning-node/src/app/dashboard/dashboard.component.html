@@ -1,0 +1,68 @@
+<div class="header">
+  Welcome!
+  <button
+    mat-raised-button
+    (click)="logout()"
+    color="primary"
+    class="logout-button"
+  >
+    Logout
+  </button>
+</div>
+<div class="table-container">
+  <table mat-table [dataSource]="userDataSource" class="mat-elevation-z8">
+    <!-- name Column -->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td class="color-grey" mat-cell *matCellDef="let element">
+        {{ element.name }}
+      </td>
+    </ng-container>
+
+    <!-- designation Column -->
+    <ng-container matColumnDef="designation">
+      <th mat-header-cell *matHeaderCellDef>Designation</th>
+      <td class="color-grey" mat-cell *matCellDef="let element">
+        {{ element.designation }}
+      </td>
+    </ng-container>
+
+    <!-- username Column -->
+    <ng-container matColumnDef="username">
+      <th mat-header-cell *matHeaderCellDef>Username</th>
+      <td class="color-grey" mat-cell *matCellDef="let element">
+        {{ element.username }}
+      </td>
+    </ng-container>
+
+    <!-- role Column -->
+    <ng-container matColumnDef="role">
+      <th mat-header-cell class="text-center" *matHeaderCellDef>Role</th>
+      <td class="color-grey text-center" mat-cell *matCellDef="let element">
+        <span class="p-12">{{ element.role }}</span>
+        @if (isAdmin) {
+          <button
+            mat-button
+            class="update-button"
+            (click)="updateRole(element.id)"
+          >
+            {{ element.role === "admin" ? "Downgrade" : "Upgrade" }}
+          </button>
+        }
+      </td>
+    </ng-container>
+
+    <!-- delete Column -->
+    <ng-container matColumnDef="delete">
+      <th mat-header-cell *matHeaderCellDef>Delete</th>
+      <td class="color-grey" mat-cell *matCellDef="let element">
+        <button mat-button class="warn-button" (click)="deleteUser(element.id)">
+          Delete
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="userColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: userColumns"></tr>
+  </table>
+</div>
