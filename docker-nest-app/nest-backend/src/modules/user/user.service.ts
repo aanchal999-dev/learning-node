@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { StoredUser, userData } from '../../common/utils/types';
 
@@ -12,18 +12,11 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly _configService: ConfigService,
   ) { }
 
   // fetches data of all the users to display for admin
   async getAllUsers(userDetails: userData): Promise<UserResponse[]> {
-    const users = await this.userRepository.find();
-    const currentUser = users.find((u) => u.username === userDetails.username);
-
-    const isAdmin =
-      currentUser?.role === 'admin' ||
-      userDetails.username ===
-        this._configService.getOrThrow<string>('ADMIN_USERNAME');
+    const isAdmin = userDetails.role === 'admin';
 
     const sanitizeUser = (user: StoredUser): UserResponse => {
       const { password, ...rest } = user;
@@ -31,14 +24,23 @@ export class UserService {
     };
 
     if (isAdmin) {
+      const users = await this.userRepository.find({
+        where: {
+          username: Not(userDetails.username),
+        },
+      });
       return users.map(sanitizeUser);
     }
 
-    if (currentUser) {
-      return [sanitizeUser(currentUser)];
+    const currentUser = await this.userRepository.findOne({
+      where: { username: userDetails.username },
+    });
+
+    if (!currentUser) {
+      throw new NotFoundException('User not found!');
     }
 
-    throw new NotFoundException('User not found!');
+    return [sanitizeUser(currentUser)];
   }
 
   async deleteUser(

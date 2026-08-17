@@ -55,12 +55,10 @@ export class AuthService {
     let role: string;
     let usernameToSign: string;
 
-    if (
-      payload.username ===
-      this._configService.getOrThrow<string>('ADMIN_USERNAME')
-    ) {
-      const adminPassword =
-        this._configService.getOrThrow<string>('ADMIN_PASSWORD');
+    const adminUsername = this._configService.getOrThrow<string>('ADMIN_USERNAME');
+    const adminPassword = this._configService.getOrThrow<string>('ADMIN_PASSWORD');
+
+    if (payload.username === adminUsername) {
       if (payload.password !== adminPassword) {
         throw new UnauthorizedException('Invalid credentials!');
       }
@@ -83,6 +81,7 @@ export class AuthService {
       if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials!');
       }
+
       usernameToSign = foundUser.username;
       role = foundUser.role || 'user';
     }
