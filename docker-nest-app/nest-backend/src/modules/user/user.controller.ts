@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Patch, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Req } from '@nestjs/common';
 import type { Request } from 'express';
-import { UserService } from '../../services/user/user.service';
-import { userData } from 'src/common/utils/types';
-import { UpdateUserRoleDto } from 'src/dto/user.dto';
+import { UserService } from './user.service';
+import { userData } from '../../common/utils/types';
+import { UpdateUserRoleDto } from './dto/user.dto';
 
 @Controller('users')
 export class UserController {

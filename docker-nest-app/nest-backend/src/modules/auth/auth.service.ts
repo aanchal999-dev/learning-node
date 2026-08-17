@@ -8,9 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { LoginDto, RegisterDto } from '../../dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../../user/user.entity';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -20,9 +20,9 @@ export class AuthService {
     private readonly _configService: ConfigService,
     private readonly _jwtService: JwtService,
   ) { }
+
   // 1. Register User in MySQL Database
   async saveUser(payload: RegisterDto): Promise<{ message: string }> {
-    // Check if user already exists in MySQL
     const userExists = await this.userRepository.findOne({
       where: { username: payload.username },
     });
@@ -37,7 +37,6 @@ export class AuthService {
         ? 'admin'
         : 'user';
 
-    //create & save user to mysql table
     const newUser = this.userRepository.create({
       ...payload,
       password: hashedPassword,
@@ -56,7 +55,6 @@ export class AuthService {
     let role: string;
     let usernameToSign: string;
 
-    //If the username is admin, check if the password matches the admin password from .env
     if (
       payload.username ===
       this._configService.getOrThrow<string>('ADMIN_USERNAME')
@@ -69,7 +67,6 @@ export class AuthService {
       usernameToSign = payload.username;
       role = 'admin';
     } else {
-      // Find user in MySQL by username
       const foundUser = await this.userRepository.findOne({
         where: { username: payload.username },
       });
@@ -80,7 +77,7 @@ export class AuthService {
 
       const isPasswordValid = await bcrypt.compare(
         payload.password,
-        foundUser.password
+        foundUser.password,
       );
 
       if (!isPasswordValid) {

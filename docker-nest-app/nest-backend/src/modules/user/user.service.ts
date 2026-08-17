@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../user/user.entity';
-import { StoredUser, userData } from 'src/common/utils/types';
+import { User } from './entities/user.entity';
+import { StoredUser, userData } from '../../common/utils/types';
 
 export type UserResponse = Omit<StoredUser, 'password'>;
 
@@ -15,7 +15,7 @@ export class UserService {
     private readonly _configService: ConfigService,
   ) { }
 
-  //fetches data of all the users to display for admin
+  // fetches data of all the users to display for admin
   async getAllUsers(userDetails: userData): Promise<UserResponse[]> {
     const users = await this.userRepository.find();
     const currentUser = users.find((u) => u.username === userDetails.username);
@@ -23,7 +23,7 @@ export class UserService {
     const isAdmin =
       currentUser?.role === 'admin' ||
       userDetails.username ===
-      this._configService.getOrThrow<string>('ADMIN_USERNAME');
+        this._configService.getOrThrow<string>('ADMIN_USERNAME');
 
     const sanitizeUser = (user: StoredUser): UserResponse => {
       const { password, ...rest } = user;

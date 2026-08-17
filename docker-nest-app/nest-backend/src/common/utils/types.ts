@@ -1,4 +1,4 @@
-import { RegisterDto } from "src/dto/auth.dto";
+import { RegisterDto } from '../../modules/auth/dto/auth.dto';
 
 export type userData = {
   token: string;
@@ -7,5 +7,7 @@ export type userData = {
 };
 
 export interface StoredUser extends RegisterDto {
+  id?: string;
   role?: string;
 }
+

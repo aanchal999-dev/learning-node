@@ -3,10 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthGuard } from 'src/common/guards/auth/auth.guard';
-import { AuthController } from 'src/controllers/auth/auth.controller';
-import { AuthService } from 'src/services/auth/auth.service';
-import { User } from 'src/user/user.entity';
+import { AuthGuard } from '../../common/guards/auth/auth.guard';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   imports: [
@@ -36,4 +36,4 @@ import { User } from 'src/user/user.entity';
   ],
   exports: [AuthService],
 })
-export class AuthModule { }
+export class AuthModule {}
