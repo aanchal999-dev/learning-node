@@ -4,17 +4,19 @@ services:
     image: mysql:8.0
     container_name: mysql-container
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: learning_node_db
-      MYSQL_USER: Aanchal
-      MYSQL_PASSWORD: Aanchal@123
+    # environment:
+    #   MYSQL_ROOT_PASSWORD: rootpassword
+    #   MYSQL_DATABASE: learning_node_db
+    #   MYSQL_USER: Aanchal
+    #   MYSQL_PASSWORD: Aanchal@123
+    env_file:
+      - ./.env-db
     ports:
       - "3306:3306"
     networks:
       - app-network
     healthcheck:
-      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent" ]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -38,7 +40,7 @@ services:
 
   #Angular Frontend
   frontend:
-    profiles: [ "build" ]
+    profiles: ["build"]
     build:
       context: ./frontend/learning-node
       dockerfile: dockerfile
